@@ -5,10 +5,10 @@
              #-}
 module Test.Equal
   ( -- * Types
-    AreEqualF,
-    Diff,
+    AreEqualF(..),
+    Diff(..),
     AreEqual,
-    Comparator,
+    Comparator(..),
     -- * Equal class
     Equal(..),
     -- * Comparators
