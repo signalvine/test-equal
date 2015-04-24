@@ -16,7 +16,11 @@ module Test.Equal
     cmpFields,
     cmpFieldsWith,
     -- * Pretty-printing
-    ppEquality
+    ppEquality,
+    ppDiffL,
+    ppEqualityL,
+    indent,
+    Lines
   )
   where
 
@@ -49,6 +53,7 @@ data Diff
   | AtomsDiffer
       String
       String
+  | CustomDiff Lines
   deriving (Eq, Show)
 
 cmpAtom :: (Eq a, Show a) => a -> a -> AreEqual
@@ -216,9 +221,13 @@ ppDiffL diff =
       ["expected " <> fromString v1
       ,"but got  " <> fromString v2
       ]
+    CustomDiff lines -> lines
+
+ppEqualityL :: AreEqual -> Lines
+ppEqualityL eq =
+  case eq of
+    Equal -> ["equal"]
+    NotEqual diff -> ppDiffL diff
 
 ppEquality :: AreEqual -> Text
-ppEquality eq =
-  case eq of
-    Equal -> "equal"
-    NotEqual diff -> toLazyText . mconcat . map (<> "\n") $ ppDiffL diff
+ppEquality eq = toLazyText . mconcat . map (<> "\n") $ ppEqualityL eq
