@@ -3,7 +3,22 @@
              DeriveFunctor, DeriveFoldable, DeriveTraversable,
              DefaultSignatures
              #-}
-module Test.Equal where
+module Test.Equal
+  ( -- * Types
+    AreEqualF,
+    Diff,
+    AreEqual,
+    Comparator,
+    -- * Equal class
+    Equal(..),
+    -- * Comparators
+    cmpAtom,
+    cmpFields,
+    cmpFieldsWith,
+    -- * Pretty-printing
+    ppEquality
+  )
+  where
 
 import Prelude hiding (lines)
 import Data.Monoid
