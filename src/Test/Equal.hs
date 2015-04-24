@@ -218,8 +218,8 @@ ppDiffL diff =
       | (field, diff') <- diffs
       ]
     AtomsDiffer v1 v2 ->
-      ["expected " <> fromString v1
-      ,"but got  " <> fromString v2
+      ["expected " <> fromString v2
+      ,"but got  " <> fromString v1
       ]
     CustomDiff lines -> lines
 
