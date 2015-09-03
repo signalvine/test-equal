@@ -20,7 +20,7 @@ library
   exposed-modules:     Test.Equal
   -- other-modules:       
   -- other-extensions:    
-  build-depends:       base >=4.7 && <4.8,
+  build-depends:       base >=4.7 && <5,
                        text >= 1.0,
                        generics-sop >= 0.1.1,
                        transformers
