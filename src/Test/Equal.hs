@@ -211,7 +211,7 @@ nthConstructorName n conInfos =
 type LabeledContainerDiff t a
   =  t a
   -> t a
-  -> ( [(Builder, a, a)]
+  -> ( [(Builder, (a, a))]
      , [(Builder, a)]
      , [(Builder, a)]
      )
@@ -224,7 +224,7 @@ cmpLabeledContainers fn t1 t2 =
   let
     (common, only_1, only_2) = fn t1 t2
     diffs1 = concatMap
-      (\(label, x1, x2) ->
+      (\(label, (x1, x2)) ->
         case cmp x1 x2 of
           Equal -> []
           NotEqual diff ->
