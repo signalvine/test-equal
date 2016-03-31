@@ -18,6 +18,7 @@ cabal-version:       >=1.10
 
 library
   exposed-modules:     Test.Equal
+                       Test.Equal.Instances
   -- other-modules:       
   -- other-extensions:    
   build-depends:       base >=4.7 && <5,
