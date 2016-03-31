@@ -15,6 +15,8 @@ module Test.Equal
     cmpAtom,
     cmpFields,
     cmpFieldsWith,
+    LabeledContainerDiff,
+    cmpLabeledContainers,
     -- * Pretty-printing
     ppEquality,
     ppDiffL,
@@ -193,6 +195,52 @@ conName ci =
 nthConstructorName :: SingI xs => NS smth xs -> NP ConstructorInfo xs -> ConstructorName
 nthConstructorName n conInfos =
   unI . hcollapse $ hliftA2 (\ci _ -> K $ conName ci) conInfos n
+
+----------------------------------------------------------------------
+--                         Comparing containers
+----------------------------------------------------------------------
+
+-- | A function that returns, for any two instances of the labeled
+-- container @t a@:
+--
+-- 1. Elements in both containers, with their common labels
+--
+-- 2. Elements in the first container only, with their labels
+--
+-- 3. Elements in the second container only, with their labels
+type LabeledContainerDiff t a
+  =  t a
+  -> t a
+  -> ( [(Builder, a, a)]
+     , [(Builder, a)]
+     , [(Builder, a)]
+     )
+
+cmpLabeledContainers
+  :: (Equal a, Show a)
+  => LabeledContainerDiff t a
+  -> (t a -> t a -> AreEqual)
+cmpLabeledContainers fn t1 t2 =
+  let
+    (common, only_1, only_2) = fn t1 t2
+    diffs1 = concatMap
+      (\(label, x1, x2) ->
+        case cmp x1 x2 of
+          Equal -> []
+          NotEqual diff ->
+            "Wrong element " <> label : indent (ppDiffL diff)
+      ) common
+    diffs2 = map
+      (\(label, x1) -> "Extra element " <> label <> ": " <> fromString (show x1))
+      only_1
+    diffs3 = map
+      (\(label, x2) -> "Missing element " <> label <> ": " <> fromString (show x2))
+      only_2
+    diffs = concat [diffs1, diffs2, diffs3]
+  in
+    if null diffs
+      then Equal
+      else NotEqual $ CustomDiff diffs
 
 ----------------------------------------------------------------------
 --                           Pretty-printing

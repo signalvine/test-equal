@@ -5,8 +5,10 @@
 --
 -- The instances provided by this module are:
 --
--- @instance ('Show' a, 'Equal' a) => 'Equal' [a]@
-{-# LANGUAGE OverloadedStrings #-}
+-- * @instance ('Show' a, 'Equal' a) => 'Equal' [a]@
+--
+-- * A default overlappable @instance ('Eq' a, 'Show' a) => 'Equal' a where 'cmp' = 'cmpAtom'@
+{-# LANGUAGE OverloadedStrings, FlexibleInstances, UndecidableInstances #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Test.Equal.Instances () where
 
@@ -16,24 +18,10 @@ import Data.Text.Lazy.Builder.Int
 import Data.Monoid ((<>))
 
 instance (Show a, Equal a) => Equal [a] where
-  cmp l1 l2 =
-    let
-      diffs1 = concat $ zipWith3
-        (\i x1 x2 ->
-          case cmp x1 x2 of
-            Equal -> []
-            NotEqual diff ->
-              "Wrong element (!! " <> decimal i <> ")" : indent (ppDiffL diff)
-        )
-        [0::Int ..] l1 l2
-      diffs2 = zipWith
-        (\i x1 -> "Extra element (!! " <> decimal i <> "): " <> fromString (show x1))
-        [length l2 ..] (drop (length l2) l1)
-      diffs3 = zipWith
-        (\i x2 -> "Missing element (!! " <> decimal i <> "): " <> fromString (show x2))
-        [length l1 ..] (drop (length l1) l2)
-      diffs = concat [diffs1, diffs2, diffs3]
-    in
-      if null diffs
-        then Equal
-        else NotEqual $ CustomDiff diffs
+  cmp = cmpLabeledContainers $ \l1 l2 ->
+    ( zip3 (map decimal [0::Int ..]) l1 l2
+    , zip  (map decimal [length l2 ..]) (drop (length l2) l1)
+    , zip  (map decimal [length l1 ..]) (drop (length l1) l2)
+    )
+
+instance {-# OVERLAPPABLE #-} (Eq a, Show a) => Equal a where cmp = cmpAtom
