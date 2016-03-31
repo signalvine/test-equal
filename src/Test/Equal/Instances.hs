@@ -2,9 +2,13 @@
 --
 -- If you wish to override any of the provided instances, do not import
 -- this module.
+--
+-- The instances provided by this module are:
+--
+-- @instance ('Show' a, 'Equal' a) => 'Equal' [a]@
 {-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
-module Test.Equal.Instances (Equal) where
+module Test.Equal.Instances () where
 
 import Test.Equal
 import Data.Text.Lazy.Builder
