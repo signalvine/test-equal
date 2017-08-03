@@ -1,0 +1,35 @@
+name: test-equal
+version: '1.0'
+synopsis: Show differences between complex datatypes
+category: Testing
+author: Roman Cheplyaka <roma@ro-che.info>
+maintainer: Echo Nolan <echo@echonolan.net>
+license: MIT
+homepage: https://github.com/signalvine/test-equal
+
+dependencies:
+  - base >= 4.7 && < 5
+  - generics-sop >= 0.1.1
+
+library:
+  source-dirs: src
+  ghc-options: -Wall
+  exposed-modules:
+  - Test.Equal
+  - Test.Equal.Instances
+  dependencies:
+  - base >=4.7 && <5
+  - text >=1.0
+  - transformers
+  - containers
+  - unordered-containers
+  - hashable
+
+tests:
+  test:
+    main: test.hs
+    source-dirs: tests
+    dependencies:
+    - tasty >=0.10
+    - tasty-hunit
+    - test-equal
