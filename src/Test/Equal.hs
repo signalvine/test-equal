@@ -30,8 +30,6 @@ import Prelude hiding (lines)
 import Data.Monoid
 import Data.Text.Lazy (Text)
 import Data.Text.Lazy.Builder
-import Data.Foldable (Foldable)
-import Data.Traversable (Traversable)
 import Control.Monad.Trans.State.Strict
 import Generics.SOP
 
@@ -220,9 +218,9 @@ cmpLabeledContainers
   :: (Equal a, Show a)
   => LabeledContainerDiff t a
   -> (t a -> t a -> AreEqual)
-cmpLabeledContainers fn t1 t2 =
+cmpLabeledContainers f t1 t2 =
   let
-    (common, only_1, only_2) = fn t1 t2
+    (common, only_1, only_2) = f t1 t2
     diffs1 = concatMap
       (\(label, (x1, x2)) ->
         case cmp x1 x2 of

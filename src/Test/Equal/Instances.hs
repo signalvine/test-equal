@@ -15,7 +15,6 @@ module Test.Equal.Instances () where
 import Test.Equal
 import Data.Text.Lazy.Builder
 import Data.Text.Lazy.Builder.Int
-import Data.Monoid ((<>))
 import Data.Bifunctor
 import qualified Data.Map as Map
 import qualified Data.IntMap as IntMap
