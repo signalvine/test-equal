@@ -119,7 +119,7 @@ cmpFieldsWith cmpss_ x y = checkSum sing conInfos cmpss_ (from x) (from y)
       -> AreEqual
     checkSum SCons (c :*  _) (POP (cmps :* _)) (SOP (Z xs))  (SOP (Z ys))  = checkProduct c cmps xs ys
     checkSum SCons (_ :* cs) (POP (_:* cmpss)) (SOP (S xss)) (SOP (S yss)) = checkSum sing cs (POP cmpss) (SOP xss) (SOP yss)
-    
+
     checkSum SCons (c :* cs) _ (SOP (Z _)) (SOP (S xs)) =
       NotEqual $ ConstructorsDiffer tyName
         (conName c, show x)
@@ -131,7 +131,7 @@ cmpFieldsWith cmpss_ x y = checkSum sing conInfos cmpss_ (from x) (from y)
 
     checkSum _ _ _ _ _ = error "Test.Equal.checkSum: non-exhaustive match?"
 
-    -- checkProduct :: forall 
+    -- checkProduct :: forall
     checkProduct
       :: forall xs . SingI xs
       => ConstructorInfo xs
@@ -146,7 +146,7 @@ cmpFieldsWith cmpss_ x y = checkSum sing conInfos cmpss_ (from x) (from y)
         `hap` cmps
         `hap` xs
         `hap` ys
-  
+
 merge :: [AreEqualF d] -> AreEqualF [d]
 merge =
   let f :: AreEqualF  d
