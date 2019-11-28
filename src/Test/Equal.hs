@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings, RankNTypes, KindSignatures, DataKinds,
              ConstraintKinds, GADTs, ScopedTypeVariables,
              DeriveFunctor, DeriveFoldable, DeriveTraversable,
-             DefaultSignatures
+             DefaultSignatures, FlexibleContexts, TypeOperators
              #-}
 module Test.Equal
   ( -- * Types
@@ -27,7 +27,7 @@ module Test.Equal
   where
 
 import Prelude hiding (lines)
-import Data.Monoid
+import Data.Monoid ((<>))
 import Data.Text.Lazy (Text)
 import Data.Text.Lazy.Builder
 import Control.Monad.Trans.State.Strict
@@ -83,13 +83,13 @@ instance Equal Char
 
 newtype Comparator a = Comparator { applyComparator :: a -> a -> AreEqual }
 
-std :: forall xss . (All2 Equal xss, SingI xss) => POP Comparator xss
+std :: forall xss . (All2 Equal xss) => POP Comparator xss
 std = hcpure (Proxy :: Proxy Equal) $ Comparator cmp
 
 cmpFields
   :: forall a xss .
      ( Generic a, xss ~ Code a
-     , All2 Equal xss, SingI xss
+     , All2 Equal xss
      , HasDatatypeInfo a, Show a)
   => a -> a -> AreEqual
 cmpFields = cmpFieldsWith std
@@ -98,7 +98,7 @@ cmpFieldsWith
   :: forall a . (Generic a, HasDatatypeInfo a, Show a)
   => POP Comparator (Code a)
   -> (a -> a -> AreEqual) -- ^ comparator
-cmpFieldsWith cmpss_ x y = checkSum sing conInfos cmpss_ (from x) (from y)
+cmpFieldsWith cmpss_ x y = checkSum sList conInfos cmpss_ (from x) (from y)
   where
     conInfos :: NP ConstructorInfo (Code a)
     tyName :: DatatypeName
@@ -110,15 +110,15 @@ cmpFieldsWith cmpss_ x y = checkSum sing conInfos cmpss_ (from x) (from y)
     -- check that the two values are built from the same constructor of
     -- a sum type
     checkSum
-      :: forall xss .
-         Sing xss
+      :: forall xss . All SListI xss
+      => SList xss
       -> NP ConstructorInfo xss
       -> POP Comparator xss
       -> SOP I xss
       -> SOP I xss
       -> AreEqual
     checkSum SCons (c :*  _) (POP (cmps :* _)) (SOP (Z xs))  (SOP (Z ys))  = checkProduct c cmps xs ys
-    checkSum SCons (_ :* cs) (POP (_:* cmpss)) (SOP (S xss)) (SOP (S yss)) = checkSum sing cs (POP cmpss) (SOP xss) (SOP yss)
+    checkSum SCons (_ :* cs) (POP (_:* cmpss)) (SOP (S xss)) (SOP (S yss)) = checkSum sList cs (POP cmpss) (SOP xss) (SOP yss)
     
     checkSum SCons (c :* cs) _ (SOP (Z _)) (SOP (S xs)) =
       NotEqual $ ConstructorsDiffer tyName
@@ -133,7 +133,7 @@ cmpFieldsWith cmpss_ x y = checkSum sing conInfos cmpss_ (from x) (from y)
 
     -- checkProduct :: forall 
     checkProduct
-      :: forall xs . SingI xs
+      :: forall xs . SListI xs
       => ConstructorInfo xs
       -> NP Comparator xs
       -> NP I xs
@@ -166,18 +166,18 @@ compareField
 compareField (FieldInfo name) c (I x1) (I x2) =
   K $ fmap ((,) name) $ applyComparator c x1 x2
 
-fieldNames :: SingI xs => ConstructorInfo xs -> NP FieldInfo xs
+fieldNames :: SListI xs => ConstructorInfo xs -> NP FieldInfo xs
 fieldNames ci =
   case ci of
     Record _ fields -> fields
     _ -> genNames
 
   where
-    genNames :: SingI xs => NP FieldInfo xs
+    genNames :: SListI xs => NP FieldInfo xs
     genNames =
       evalState (hsequence' $ hpure (Comp genName)) 1
 
-    genName :: SingI xs => State Int (FieldInfo xs)
+    genName :: forall a. State Integer (FieldInfo a)
     genName = do
       n <- get
       put $! n+1
@@ -190,9 +190,9 @@ conName ci =
     Infix name _ _ -> name
     Record name _ -> name
 
-nthConstructorName :: SingI xs => NS smth xs -> NP ConstructorInfo xs -> ConstructorName
+nthConstructorName :: SListI xs => NS smth xs -> NP ConstructorInfo xs -> ConstructorName
 nthConstructorName n conInfos =
-  unI . hcollapse $ hliftA2 (\ci _ -> K $ conName ci) conInfos n
+  hcollapse $ hliftA2 (\ci _ -> K $ conName ci) conInfos n
 
 ----------------------------------------------------------------------
 --                         Comparing containers
