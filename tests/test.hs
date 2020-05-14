@@ -1,5 +1,4 @@
 {-# LANGUAGE TemplateHaskell, DataKinds, TypeFamilies #-}
-import Generics.SOP
 import Generics.SOP.TH
 import Test.Equal
 import Test.Tasty
@@ -12,6 +11,7 @@ data Type
 
 deriveGeneric ''Type
 
+main :: IO ()
 main = defaultMain $ testGroup "cmpFields"
   [ testCase "Equal" $
       cmpFields (Con1 2) (Con1 2) @?= Equal

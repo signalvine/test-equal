@@ -27,7 +27,6 @@ module Test.Equal
   where
 
 import Prelude hiding (lines)
-import Data.Monoid ((<>))
 import Data.Text.Lazy (Text)
 import Data.Text.Lazy.Builder
 import Control.Monad.Trans.State.Strict
@@ -104,7 +103,7 @@ cmpFieldsWith cmpss_ x y = checkSum sList conInfos cmpss_ (from x) (from y)
     tyName :: DatatypeName
     (tyName, conInfos) =
       case datatypeInfo (Proxy :: Proxy a) of
-        ADT _ tyName' conInfos' -> (tyName', conInfos')
+        ADT _ tyName' conInfos' _ -> (tyName', conInfos')
         Newtype _ tyName' conInfo -> (tyName', conInfo :* Nil)
 
     -- check that the two values are built from the same constructor of
